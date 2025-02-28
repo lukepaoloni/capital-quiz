@@ -48,3 +48,36 @@ describe('Quiz Question Endpoint', function () {
     });
 });
 
+describe('Quiz Answer Endpoint', function () {
+    it('validates selected city as correct answer', function () {
+        $response = $this->postJson('/api/v1/quiz/answer', ['guess' => 'London', 'country' => 'GB']);
+
+        $result = $response->json('data.isCorrect');
+
+        expect($result)->toBeTrue();
+    });
+
+    it('validates selected city as incorrect answer', function () {
+        $response = $this->postJson('/api/v1/quiz/answer', ['guess' => 'Washington', 'country' => 'GB']);
+
+        $result = $response->json('data.isCorrect');
+
+        expect($result)->toBeFalse();
+    });
+
+    it('returns the correct capital when answer is incorrect', function () {
+        $response = $this->postJson('/api/v1/quiz/answer', ['guess' => 'Washington', 'country' => 'GB']);
+
+        $correctCity = $response->json('data.correctAnswer');
+
+        expect($correctCity)->toBe('London');
+    });
+
+    it('returns a 422 status code when no guess is provided', function () {
+        $response = $this->postJson('/api/v1/quiz/answer', ['guess' => null, 'country' => 'GB']);
+
+        $statusCode = $response->getStatusCode();
+
+        expect($statusCode)->toBe(422);
+    });
+});

@@ -10,28 +10,31 @@ export default function Index() {
     const [error, setError] = useState();
     const [question, setQuestion] = useState();
     const [isAnswerCorrect, setIsAnswerCorrect] = useState(false);
+    const [hasAttempted, setHasAttempted] = useState(false);
+    const [correctAnswer, setCorrectAnswer] = useState();
+    const [feedback, setFeedback] = useState();
+
+    const fetchQuestion = async () => {
+        try {
+            setIsQuestionLoading(true);
+            const response = await fetch('/api/v1/quiz/question');
+            if (!response.ok) {
+                const errorText = response.headers.get('content-type')?.includes('application/json')
+                    ? (await response.json())?.error
+                    : `${response.status}: ${response.statusText}`;
+
+                throw new Error(errorText || 'Failed to retrieve question.');
+            }
+            const result = await response.json();
+            setQuestion(result.data.question);
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setIsQuestionLoading(false);
+        }
+    }
 
     useEffect( () => {
-        const fetchQuestion = async () => {
-            try {
-                setIsQuestionLoading(true);
-                const response = await fetch('/api/v1/quiz/question');
-                if (!response.ok) {
-                    const errorText = response.headers.get('content-type')?.includes('application/json')
-                        ? (await response.json())?.error
-                        : `${response.status}: ${response.statusText}`;
-
-                    throw new Error(errorText || 'Failed to retrieve question.');
-                }
-                const result = await response.json();
-                setQuestion(result.data.question);
-            } catch (err) {
-                setError(err.message);
-            } finally {
-                setIsQuestionLoading(false);
-            }
-        }
-
         fetchQuestion();
     }, [] );
 
@@ -63,11 +66,22 @@ export default function Index() {
     const onSubmit = async (guess, country) => {
         try {
             const result = await submitAnswer(guess, country);
-            setIsAnswerCorrect(result.data?.answer === 'correct');
+            setIsAnswerCorrect(result.data.isCorrect);
+            setCorrectAnswer(result.data.correctAnswer);
+            setFeedback(result.data.feedback);
+            setHasAttempted(true);
         } catch (err) {
             setError(err.message);
         }
     };
+
+    const onTryAgain = async () => {
+        await fetchQuestion();
+        setHasAttempted(false);
+        setFeedback(null);
+        setCorrectAnswer(null);
+        setIsAnswerCorrect(null);
+    }
 
     return (
         <div className="flex flex-col justify-between items-center w-screen h-screen p-16">
@@ -81,13 +95,18 @@ export default function Index() {
                     </Alert>
                 )}
                 {
-                    isQuestionLoading ?
+                    isQuestionLoading && !hasAttempted ?
                         <SkeletonCard />
                         :
                         <Quiz question={question}
                               onSubmit={onSubmit}
                               isSubmitting={isSubmitting}
                               isAnswerCorrect={isAnswerCorrect}
+                              correctAnswer={correctAnswer}
+                              feedback={feedback}
+                              isQuestionLoading={isQuestionLoading}
+                              hasAttempted={hasAttempted}
+                              onTryAgain={onTryAgain}
                         />
                 }
             </div>

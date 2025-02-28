@@ -12,4 +12,11 @@ interface CountryProviderInterface
      * @throws CountryProviderException
      */
     public function getAll(): Collection;
+
+    /**
+     * @param string $isoCode
+     * @return array
+     * @throws CountryProviderException
+     */
+    public function getByIsoCode(string $isoCode): array;
 }

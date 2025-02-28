@@ -25,4 +25,9 @@ class CountriesNowApiProvider implements CountryProviderInterface
             throw new CountryProviderException('API request failed: ' . $ex->getMessage());
         }
     }
+
+    public function getByIsoCode(string $isoCode): array
+    {
+        return $this->getAll()->where('iso2', $isoCode)->first();
+    }
 }
