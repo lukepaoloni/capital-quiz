@@ -16,15 +16,15 @@ export default function Index() {
             try {
                 setIsQuestionLoading(true);
                 const response = await fetch('/api/v1/quiz/question');
-                if (!response.ok && response.headers.get('content-type') !== 'application/json') {
-                    throw new Error(`${response.status}: ${response.statusText}`);
+                if (!response.ok) {
+                    const errorText = response.headers.get('content-type')?.includes('application/json')
+                        ? (await response.json())?.error
+                        : `${response.status}: ${response.statusText}`;
+
+                    throw new Error(errorText || 'Failed to retrieve question.');
                 }
                 const result = await response.json();
-                if (result.data?.error || !response.ok) {
-                    throw new Error(result.data?.error || 'Failed to retrieve question.');
-                }
-
-                setQuestion(result.data.country);
+                setQuestion(result.data.question);
             } catch (err) {
                 setError(err.message);
             } finally {
@@ -48,7 +48,7 @@ export default function Index() {
 
             if (!response.ok) {
                 const errorText = response.headers.get('content-type')?.includes('application/json')
-                    ? (await response.json()).data?.error
+                    ? (await response.json())?.error
                     : `${response.status}: ${response.statusText}`;
 
                 throw new Error(errorText || 'Failed to submit answer.');

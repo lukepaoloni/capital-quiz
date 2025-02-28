@@ -10,33 +10,24 @@ export default function Quiz({ question, onSubmit, isSubmitting, isAnswerCorrect
     if (!question) {
         return <p>Please contact support.</p>
     }
+
     return (
         <Card className="w-full mb-32">
             <CardHeader>
-                <CardTitle>What is the capital city of United Kingdom?</CardTitle>
+                <CardTitle>{question.title}</CardTitle>
             </CardHeader>
             <CardContent>
                 <ul className="flex flex-col space-y-2">
-                    <li>
-                        <Button variant="ghost" className={`bg-gray-50/75 w-full justify-start px-4 py-6${guess === 'London' ? ' bg-primary/90 hover:bg-primary/90 hover:text-white text-white' : ''}`} onClick={() => setGuess('London')}>
-                            <span>London</span>
-                        </Button>
-                    </li>
-                    <li>
-                        <Button variant="ghost" className={`bg-gray-50/75 w-full justify-start px-4 py-6${guess === 'Sheffield' ? ' bg-primary/90 hover:bg-primary/90 hover:text-white text-white' : ''}`} onClick={() => setGuess('Sheffield')}>
-                            <span>Sheffield</span>
-                        </Button>
-                    </li>
-                    <li>
-                        <Button variant="ghost" className={`bg-gray-50/75 w-full justify-start px-4 py-6${guess === 'York' ? ' bg-primary/90 hover:bg-primary/90 hover:text-white text-white' : ''}`} onClick={() => setGuess('York')}>
-                            <span>York</span>
-                        </Button>
-                    </li>
-                    <li>
-                        <Button variant="ghost" className={`bg-gray-50/75 w-full justify-start px-4 py-6${guess === 'Glasgow' ? ' bg-primary/90 hover:bg-primary/90 hover:text-white text-white' : ''}`} onClick={() => setGuess('Glasgow')}>
-                            <span>Glasgow</span>
-                        </Button>
-                    </li>
+                    {question.answers.map(answer => (
+                        <li>
+                            <Button variant="ghost"
+                                    className={`bg-gray-50/75 w-full justify-start px-4 py-6${guess === answer ? ' bg-primary/90 hover:bg-primary/90 hover:text-white text-white' : ''}`}
+                                    onClick={() => setGuess(answer)}
+                            >
+                                <span>{answer}</span>
+                            </Button>
+                        </li>
+                    ))}
                 </ul>
             </CardContent>
             <CardFooter>
